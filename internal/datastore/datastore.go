@@ -29,3 +29,14 @@ func (s *Store) Get(key string) ([]byte, bool) {
 	value, ok := s.data[key]
 	return value, ok
 }
+
+// Delete: delete key-value data
+func (s *Store) Delete(key string) int64 {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if _, ok := s.data[key]; ok {
+		delete(s.data, key)
+		return 1
+	}
+	return 0
+}

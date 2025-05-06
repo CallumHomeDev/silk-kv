@@ -70,3 +70,8 @@ func FormatBulkString(payload []byte) []byte {
 func FormatNilBulkString() []byte {
     return []byte("$-1\r\n")
 }
+
+// FormatInteger response RESP integer: :<number>\r\n
+func FormatInteger(n int64) []byte {
+	return []byte(":" + strconv.FormatInt(n, 10) + "\r\n")
+}
