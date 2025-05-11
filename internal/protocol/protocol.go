@@ -75,3 +75,15 @@ func FormatNilBulkString() []byte {
 func FormatInteger(n int64) []byte {
 	return []byte(":" + strconv.FormatInt(n, 10) + "\r\n")
 }
+
+// FormatArray response RESP array: *<count>\r\n
+func FormatArray(arr [][]byte) []byte {
+	var buf bytes.Buffer
+	buf.WriteString("*" + strconv.Itoa(len(arr)) + "\r\n")
+	for _, elem := range arr {
+		buf.WriteString("$" + strconv.Itoa(len(elem)) + "\r\n")
+		buf.Write(elem)
+		buf.WriteString("\r\n")
+	}
+	return buf.Bytes()
+}

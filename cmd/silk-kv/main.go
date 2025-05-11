@@ -34,7 +34,7 @@ func main() {
     }
 }
 
-// Xử lý từng kết nối, parse request, log command và thực thi handler
+// handle connection, parse request, log command, dispatch handler
 func handleConnection(conn net.Conn, store *datastore.Store) {
     defer conn.Close()
     reader := bufio.NewReader(conn)
@@ -48,13 +48,13 @@ func handleConnection(conn net.Conn, store *datastore.Store) {
             return
         }
 
-        // Định danh command và args
+        // Define command and arguments
         cmd := strings.ToUpper(string(args[0]))
         var argStrings []string
-        for _, a := range args[1:] {
-            argStrings = append(argStrings, string(a))
+        for _, arg := range args[1:] {
+            argStrings = append(argStrings, string(arg))
         }
-        // In log ra server
+        // Log command and arguments
         log.Printf("[%s] Command: %s, Args: %v", conn.RemoteAddr(), cmd, argStrings)
 
         // Dispatch handler
@@ -65,7 +65,7 @@ func handleConnection(conn net.Conn, store *datastore.Store) {
         } else {
             resp = handler(store, args)
         }
-        // Gửi response
+
         conn.Write(resp)
     }
 }

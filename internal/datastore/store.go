@@ -1,17 +1,25 @@
+// internal/datastore/store.go
 package datastore
 
-import "sync"
+import (
+	"time"
+	"sync"
+)
 
 // Store:keep key-value data and ensure thread-safety
 type Store struct {
 	mu sync.RWMutex
 	data map[string][]byte
+	expires map[string]time.Time
+	lists map[string][][]byte
 }
 
 // New:create a instance of Store
 func New() *Store {
 	return &Store{
 		data: make(map[string][]byte),
+		expires: make(map[string]time.Time),
+		lists: make(map[string][][]byte),
 	}
 }
 
@@ -20,12 +28,23 @@ func (s *Store) Set(key string, value []byte) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.data[key] = value
+	delete(s.expires, key) // Remove expiration if set
 }
 
 // Get: return value by key
 func (s *Store) Get(key string) ([]byte, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
+
+	// check if the key has expired
+	if exp, ok := s.expires[key]; ok {
+		if time.Now().After(exp) {
+			delete(s.data, key)
+			delete(s.expires, key)
+			return nil, false
+		}
+	}
+
 	value, ok := s.data[key]
 	return value, ok
 }
