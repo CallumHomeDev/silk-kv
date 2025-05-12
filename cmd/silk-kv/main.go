@@ -19,7 +19,7 @@ import (
 
 func main() {
     // Initialize in-memory data store
-    store := datastore.New()
+    store := datastore.New(3)
 
     // Start TCP server
     listener, err := net.Listen("tcp", ":8081")

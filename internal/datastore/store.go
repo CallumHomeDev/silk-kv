@@ -2,6 +2,7 @@
 package datastore
 
 import (
+	"container/list"
 	"time"
 	"sync"
 )
@@ -12,15 +13,20 @@ type Store struct {
 	data map[string][]byte
 	expires map[string]time.Time
 	lists map[string][][]byte
+	evictionList *list.List
+	evictionMap map[string]*list.Element
+	capacity int
 }
 
 // New:create a instance of Store
-func New() *Store {
-	return &Store{
+func New(capacity int) *Store {
+	s := &Store{
 		data: make(map[string][]byte),
 		expires: make(map[string]time.Time),
 		lists: make(map[string][][]byte),
 	}
+	initEviction(s, capacity)
+	return s
 }
 
 // Set:save key-value data
@@ -29,6 +35,7 @@ func (s *Store) Set(key string, value []byte) {
 	defer s.mu.Unlock()
 	s.data[key] = value
 	delete(s.expires, key) // Remove expiration if set
+	s.recordAccess(key)
 }
 
 // Get: return value by key
@@ -46,6 +53,9 @@ func (s *Store) Get(key string) ([]byte, bool) {
 	}
 
 	value, ok := s.data[key]
+	if ok {
+		s.recordAccess(key)
+	}
 	return value, ok
 }
 
