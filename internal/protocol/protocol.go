@@ -51,6 +51,24 @@ func ParseRequest(reader *bufio.Reader) ([][]byte, error) {
 	return args, nil
 }
 
+// ParseFrame parse a RESP frame from a reader and return the frame type and payload
+func ParseFrame(data []byte) (args [][]byte, consumed int, err error) {
+	// Wrap the data in a buffer
+	r := bytes.NewReader(data)
+	reader := bufio.NewReader(r)
+
+	// Call ParseRequest to parse the request
+	args, err = ParseRequest(reader)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	// Count the number of bytes consumed
+	consumed = len(data) - reader.Buffered()
+	return args, consumed, nil
+}
+
+
 // FormatSimpleString response RESP simple string: +<message>\r\n
 func FormatSimpleString(message string) []byte {
 	return []byte("+" + message + "\r\n")

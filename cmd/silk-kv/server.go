@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/panjf2000/gnet"
     "github.com/CallumHomeDev/silk-kv/internal/datastore"
@@ -17,7 +18,7 @@ type SilkKVServer struct {
 
 func newServer(capacity int) *SilkKVServer {
 	return &SilkKVServer{
-		store: datastore.NewStore(capacity),
+		store: datastore.New(capacity),
 	}
 } 
 
@@ -30,14 +31,14 @@ func (s *SilkKVServer) OnInitComplete(srv gnet.Server) (action gnet.Action) {
 // React is called when a new connection is established.
 func (s *SilkKVServer) React(frame []byte, c gnet.Conn) (out []byte, action gnet.Action) {
 	// frame is the raw data received from the client
-	args, err := protocol.ParseRequest(frame)
+	args, _, err := protocol.ParseFrame(frame)
 	if err != nil {
 		out = protocol.FormatError(err.Error())
 		return out, gnet.Close
 	}
 
 	cmd := strings.ToUpper(string(args[0]))
-	handler, ok := command.Commands[cmd]
+	handler, ok := command.Handlers[cmd]
 	if !ok {
 		out = protocol.FormatError(fmt.Sprintf("unknown command '%s'", cmd))
 	} else {
