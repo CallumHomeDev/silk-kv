@@ -69,3 +69,11 @@ func (s *Store) Delete(key string) int64 {
 	}
 	return 0
 }
+
+// Exists: check if key exists
+func (s *Store) Exists(key string) bool {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	_, exists := s.data[key]
+	return exists
+}
