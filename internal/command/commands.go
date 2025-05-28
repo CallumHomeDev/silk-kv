@@ -18,6 +18,8 @@ var Handlers = map[string]func(store *datastore.Store, args [][]byte) []byte{
     "EXISTS":   Exists,
     "INCR":     Incr,
     "DECR":     Decr,
+    "DBSIZE":   DBSize,
+    "FLUSHDB":  FlushDB,
 
     // Expiration commands
     "EXPIRE":   Expire,

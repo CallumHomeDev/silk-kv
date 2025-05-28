@@ -77,3 +77,21 @@ func Decr(store *datastore.Store, args [][]byte) []byte {
     store.Set(key, []byte(strconv.FormatInt(n, 10)))
     return protocol.FormatInteger(n)
 }
+
+func DBSize(store *datastore.Store, args [][]byte) []byte {
+    if len(args) != 1 {
+        return protocol.FormatError("ERR wrong number of arguments for 'dbsize' command")
+    }
+
+    n := int64(store.Len())
+    return protocol.FormatInteger(int64(n))
+}
+
+func FlushDB(store *datastore.Store, args [][]byte) []byte {
+    if len(args) != 1 {
+        return protocol.FormatError("ERR wrong number of arguments for 'flushdb' command")
+    }
+
+    store.FlushDB()
+    return protocol.FormatSimpleString("OK")
+}
